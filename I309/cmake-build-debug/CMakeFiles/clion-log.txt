@@ -1,0 +1,4 @@
+C:\Users\feign\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" E:\Documents\Development\dotNET\C++\I309\I309
+-- Configuring done
+-- Generating done
+-- Build files have been written to: E:/Documents/Development/dotNET/C++/I309/I309/cmake-build-debug

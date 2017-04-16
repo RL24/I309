@@ -1,0 +1,3 @@
+C:\Users\feign\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -E remove -f CMakeFiles\I309.dir/objects.a
+C:\MinGW\bin\ar.exe cr CMakeFiles\I309.dir/objects.a @CMakeFiles\I309.dir\objects1.rsp
+C:\MinGW\bin\g++.exe  -g   -Wl,--whole-archive CMakeFiles\I309.dir/objects.a -Wl,--no-whole-archive  -o I309.exe -Wl,--out-implib,libI309.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\I309.dir\linklibs.rsp
