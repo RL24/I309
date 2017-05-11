@@ -1,7 +1,5 @@
 //Include necessary libraries
 #include <iostream>
-#include <algorithm>
-#include <vector>
 
 //Disable the need to use "std::<method>"
 using namespace std;
@@ -9,6 +7,9 @@ using namespace std;
 //Declare methods (must be done prior to method calls)
 bool isRowValid(string *row);
 void replaceString(string *str, string from, string to);
+
+const int COLUMNS = 9;
+const int ROWS = 9;
 
 //Main function
 int main() {
@@ -18,27 +19,65 @@ int main() {
     cout << "(spaces are optional, e.g.: ??? 4?7 ?9?)" << endl << endl;
 
     //Array to store the users input
-    const int rowCount = 3;
-    string rows[rowCount];
+    string rows[ROWS];
 
     //Get the users input
-    for (int i = 0; i < rowCount; i++) {
+    for (int i = 0; i < ROWS; i++) {
         getline(cin, rows[i]);
 
         //Ensure the user actually entered something (or that they entered a blank line to fulfill the layout of a sudoku)
         if (rows[i].length() == 0) {
             i--;
+            continue;
+        }
+
+        //Format the input for simpler parsing and validation
+        replaceString(&rows[i], " ", "");
+    }
+
+    //Validate each row and ensure the user inputs a new row for every invalid one
+    for (int i = 0; i < ROWS; i++) {
+        while (!isRowValid(&rows[i])) {
+            system("cls");
+            cout << "Row " << i + 1 << " is invalid:" << endl;
+            cout << rows[i] << endl << endl;
+            cout << "Please re-enter row " << i + 1 << ":" << endl;
+
+            //Get the new formatted row input
+            getline(cin, rows[i]);
+            replaceString(&rows[i], " ", "");
         }
     }
 
-    //Format the input for simpler parsing and validation
-    for (int i = 0; i < rowCount; i++) {
-        replaceString(&rows[i], " ", "");
-        cout << rows[i] << endl;
+    int grid[ROWS][COLUMNS];
+
+    //Convert the user input to a more usable format
+    for (int x = 0; x < COLUMNS; x++) {
+        for (int y = 0; y < ROWS; y++) {
+            //Negate by the int value of '0' to ensure the content of value is 0-9
+            int value = rows[x][y] - '0';
+
+            //If the value is not 0-9, set to -1 to represent an unknown grid cell
+            if (value < 0 || value > 9)
+                value = -1;
+
+            grid[x][y] = value;
+        }
     }
 
-    for (int i = 0; i < rowCount; i++) {
-        while (!isRowValid(&rows[i])) {
+    //Attempt to solve the sudoku
+    bool solved = false;
+    while (!solved) {
+        for (int x = 0; x < COLUMNS; x++) {
+            for (int y = 0; y < ROWS; y++) {
+                int currentCell = grid[x][y];
+
+                //If the current cell is already known, skip it
+                if (currentCell != -1)
+                    continue;
+
+
+            }
         }
     }
 
@@ -57,7 +96,7 @@ int main() {
  */
 bool isRowValid(string *row) {
     int len = row->length();
-    return len == 9 && row->find_first_not_of("0123456789?-") == string::npos;
+    return len == COLUMNS && row->find_first_not_of("0123456789?-") == string::npos;
 }
 
 /**
