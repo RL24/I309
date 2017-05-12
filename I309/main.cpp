@@ -1,5 +1,8 @@
 //Include necessary libraries
 #include <iostream>
+#include <cmath>
+#include <vector>
+#include <algorithm>
 
 //Disable the need to use "std::<method>"
 using namespace std;
@@ -76,7 +79,39 @@ int main() {
                 if (currentCell != -1)
                     continue;
 
+                //Find the current box coordinates
+                int boxX = (int) ceil(x / 3.) * 3;
+                int boxY = (int) ceil(y / 3.) * 3;
 
+                //Find the numbers that are already taken
+                vector<int> box;
+                vector<int> column;
+                vector<int> row;
+
+                //Current box
+                for (int bx = 0; bx < 3; bx++) {
+                    for (int by = 0; by < 3; by++) {
+                        int next = grid[boxX + bx][boxY + by];
+                        if (next != -1)
+                            box.push_back(next);
+                    }
+                }
+
+                //Column
+                for (int c = 0; c < COLUMNS; c++) {
+                    int next = grid[c][y];
+                    if (next != -1)
+                        column.push_back(next);
+                }
+
+                //Row
+                for (int r = 0; r < ROWS; r++) {
+                    int next = grid[x][r];
+                    if (next != -1)
+                        row.push_back(next);
+                }
+
+                
             }
         }
     }
