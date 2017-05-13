@@ -2,7 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <algorithm>
+#include <list>
+#include "Cell.h"
 
 //Disable the need to use "std::<method>"
 using namespace std;
@@ -52,7 +53,7 @@ int main() {
         }
     }
 
-    int grid[ROWS][COLUMNS];
+    Cell grid[ROWS][COLUMNS];
 
     //Convert the user input to a more usable format
     for (int x = 0; x < COLUMNS; x++) {
@@ -64,7 +65,7 @@ int main() {
             if (value < 0 || value > 9)
                 value = -1;
 
-            grid[x][y] = value;
+            grid[x][y] = Cell(x, y, value);
         }
     }
 
@@ -73,10 +74,10 @@ int main() {
     while (!solved) {
         for (int x = 0; x < COLUMNS; x++) {
             for (int y = 0; y < ROWS; y++) {
-                int currentCell = grid[x][y];
+                Cell currentCell = grid[x][y];
 
                 //If the current cell is already known, skip it
-                if (currentCell != -1)
+                if (currentCell.getValue() != -1)
                     continue;
 
                 //Find the current box coordinates
@@ -84,34 +85,40 @@ int main() {
                 int boxY = (int) ceil(y / 3.) * 3;
 
                 //Find the numbers that are already taken
-                vector<int> box;
-                vector<int> column;
-                vector<int> row;
+                list<int> box;
+                list<int> column;
+                list<int> row;
 
                 //Current box
                 for (int bx = 0; bx < 3; bx++) {
                     for (int by = 0; by < 3; by++) {
-                        int next = grid[boxX + bx][boxY + by];
-                        if (next != -1)
-                            box.push_back(next);
+                        Cell next = grid[boxX + bx][boxY + by];
+                        if (next.getValue() != -1)
+                            box.push_front(next.getValue());
                     }
                 }
 
                 //Column
                 for (int c = 0; c < COLUMNS; c++) {
-                    int next = grid[c][y];
-                    if (next != -1)
-                        column.push_back(next);
+                    Cell next = grid[c][y];
+                    if (next.getValue() != -1)
+                        column.push_front(next.getValue());
                 }
 
                 //Row
                 for (int r = 0; r < ROWS; r++) {
-                    int next = grid[x][r];
-                    if (next != -1)
-                        row.push_back(next);
+                    Cell next = grid[x][r];
+                    if (next.getValue() != -1)
+                        row.push_front(next.getValue());
                 }
 
-                
+                //box should have 6
+                //column should have 2,6,8
+                //row should have 4,5,6,7,8
+                //overall can have 1,3,9
+                //^^ that's all i have at this current point
+
+                //TODO: need to scan cells
             }
         }
     }

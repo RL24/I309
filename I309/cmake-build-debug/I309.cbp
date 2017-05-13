@@ -80,6 +80,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/Cell.cpp">
+			<Option target="I309"/>
+		</Unit>
+		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/Cell.h">
+			<Option target="I309"/>
+		</Unit>
 		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/main.cpp">
 			<Option target="I309"/>
 		</Unit>
