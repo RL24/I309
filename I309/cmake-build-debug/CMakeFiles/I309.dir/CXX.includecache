@@ -6,9 +6,25 @@
 
 #IncludeRegexTransform: 
 
+D:/Documents/Development/dotNET/C++/I309/I309/Cell.cpp
+Cell.h
+D:/Documents/Development/dotNET/C++/I309/I309/Cell.h
+
+D:/Documents/Development/dotNET/C++/I309/I309/Cell.h
+iostream
+-
+list
+-
+
 D:/Documents/Development/dotNET/C++/I309/I309/main.cpp
 iostream
 -
-math.h
+cmath
 -
+vector
+-
+list
+-
+Cell.h
+D:/Documents/Development/dotNET/C++/I309/I309/Cell.h
 

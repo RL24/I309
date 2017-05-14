@@ -43,3 +43,19 @@ int Cell::getValue() {
 list<int> Cell::getAvailable() {
     return available;
 }
+
+/**
+ * Add a value to the available number selection
+ * @param value The value to add
+ */
+void Cell::addAvailable(int value) {
+    available.push_front(value);
+}
+
+/**
+ * Remove a value from the available number selection
+ * @param value The value to remove
+ */
+void Cell::removeAvailable(int value) {
+    available.remove(value);
+}

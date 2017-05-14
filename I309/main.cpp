@@ -40,7 +40,7 @@ int main() {
     }
 
     //Validate each row and ensure the user inputs a new row for every invalid one
-    for (int i = 0; i < ROWS; i++) {
+    for (int i = 0; i < COLUMNS; i++) {
         while (!isRowValid(&rows[i])) {
             system("cls");
             cout << "Row " << i + 1 << " is invalid:" << endl;
@@ -53,7 +53,8 @@ int main() {
         }
     }
 
-    Cell grid[ROWS][COLUMNS];
+
+    Cell grid[COLUMNS][ROWS];
 
     //Convert the user input to a more usable format
     for (int x = 0; x < COLUMNS; x++) {
@@ -92,7 +93,7 @@ int main() {
                 //Current box
                 for (int bx = 0; bx < 3; bx++) {
                     for (int by = 0; by < 3; by++) {
-                        Cell next = grid[boxX + bx][boxY + by];
+                        Cell next = grid[(boxX + bx) % COLUMNS][(boxY + by) % ROWS];
                         if (next.getValue() != -1)
                             box.push_front(next.getValue());
                     }
@@ -121,6 +122,26 @@ int main() {
                 //TODO: need to scan cells
             }
         }
+
+        //TODO: clear the console window and print out the percentage of sudoku completion
+        //TODO: remove the break, and implement a proper check whether the sudoku is solved
+        break;
+    }
+
+    //Clear the console window
+    system("cls");
+
+    //Print out the final sudoku solution
+    for (int x = 0; x < COLUMNS; x++) {
+        for (int y = 0; y < ROWS; y++) {
+            Cell cell = grid[x][y];
+            cout << (cell.getValue() == -1 ? "-" : to_string(cell.getValue()));
+            if ((y + 1) % 3 == 0)
+                cout << " ";
+        }
+        cout << endl;
+        if ((x + 1) % 3 == 0)
+            cout << endl;
     }
 
     int a;
