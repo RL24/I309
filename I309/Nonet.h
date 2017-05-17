@@ -1,30 +1,28 @@
 #include <iostream>
 #include <list>
+#include "Cell.h"
 
-#ifndef I309_CELL
-#define I309_CELL
+#ifndef I309_NONET
+#define I309_NONET
 
 using namespace std;
 
-class Cell {
+class Nonet {
 private:
-    int x, y, value;
+    int x, y;
+    list<Cell> cells;
     list<int> available = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 public:
-    Cell() {}
-    Cell(int x, int y, int value);
-
+    Nonet() {}
+    Nonet(int x, int y);
     int getX();
     int getY();
-    int getValue();
-    void setValue(int value);
-
+    list<Cell> getCells();
+    void addCell(Cell cell);
+    void removeCell(Cell cell);
     list<int> getAvailable();
     void addAvailable(int value);
-    void addAvailable(list<int> values);
     void removeAvailable(int value);
-
-    bool operator==(Cell cell);
 };
 
 #endif

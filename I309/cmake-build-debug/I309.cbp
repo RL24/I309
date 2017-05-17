@@ -86,6 +86,12 @@
 		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/Cell.h">
 			<Option target="I309"/>
 		</Unit>
+		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/Nonet.cpp">
+			<Option target="I309"/>
+		</Unit>
+		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/Nonet.h">
+			<Option target="I309"/>
+		</Unit>
 		<Unit filename="D:/Documents/Development/dotNET/C++/I309/I309/main.cpp">
 			<Option target="I309"/>
 		</Unit>

@@ -1,9 +1,10 @@
 //Include necessary libraries
 #include <iostream>
-#include <cmath>
 #include <vector>
+#include <algorithm>
 #include <list>
 #include "Cell.h"
+#include "Nonet.h"
 
 //Disable the need to use "std::<method>"
 using namespace std;
@@ -12,8 +13,8 @@ using namespace std;
 bool isRowValid(string *row);
 void replaceString(string *str, string from, string to);
 
-const int COLUMNS = 9;
-const int ROWS = 9;
+const int NONET_SIZE = 3;
+const int GRID_SIZE = NONET_SIZE * 3;
 
 //Main function
 int main() {
@@ -23,10 +24,10 @@ int main() {
     cout << "(spaces are optional, e.g.: ??? 4?7 ?9?)" << endl << endl;
 
     //Array to store the users input
-    string rows[ROWS];
+    string rows[GRID_SIZE];
 
     //Get the users input
-    for (int i = 0; i < ROWS; i++) {
+    for (int i = 0; i < GRID_SIZE; i++) {
         getline(cin, rows[i]);
 
         //Ensure the user actually entered something (or that they entered a blank line to fulfill the layout of a sudoku)
@@ -40,7 +41,7 @@ int main() {
     }
 
     //Validate each row and ensure the user inputs a new row for every invalid one
-    for (int i = 0; i < COLUMNS; i++) {
+    for (int i = 0; i < GRID_SIZE; i++) {
         while (!isRowValid(&rows[i])) {
             system("cls");
             cout << "Row " << i + 1 << " is invalid:" << endl;
@@ -53,12 +54,14 @@ int main() {
         }
     }
 
+    cout << "Validated" << endl;
 
-    Cell grid[COLUMNS][ROWS];
+    Nonet nonets[NONET_SIZE][NONET_SIZE];
+    Cell grid[GRID_SIZE][GRID_SIZE];
 
     //Convert the user input to a more usable format
-    for (int x = 0; x < COLUMNS; x++) {
-        for (int y = 0; y < ROWS; y++) {
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
             //Negate by the int value of '0' to ensure the content of value is 0-9
             int value = rows[x][y] - '0';
 
@@ -69,71 +72,72 @@ int main() {
             grid[x][y] = Cell(x, y, value);
         }
     }
+    cout << "Created grid" << endl;
 
-    //Attempt to solve the sudoku
-    bool solved = false;
-    while (!solved) {
-        for (int x = 0; x < COLUMNS; x++) {
-            for (int y = 0; y < ROWS; y++) {
-                Cell currentCell = grid[x][y];
+    /**
+     * New solve method, iterate over each "nonet" (3x3 square), give each square all available numbers in
+     * the current nonet, iterate over each cell in the nonet, if each number available is already
+     * in the same row or column of the current cell, remove it from the available for that cell. If the
+     * cells available numbers only has one remaining, that is the number for that cell. Thinking of the
+     * algorithm I'll need to do this is yet for me to figure out, but I'm somewhat positive that it will
+     * require refactoring multiple times
+     */
 
-                //If the current cell is already known, skip it
-                if (currentCell.getValue() != -1)
-                    continue;
+    for (int bx = 0; bx < GRID_SIZE; bx+= NONET_SIZE) {
+        for (int by = 0; by < GRID_SIZE; by+= NONET_SIZE) {
+            Nonet nonet = Nonet(bx, by);
+            nonets[bx / NONET_SIZE][by / NONET_SIZE] = nonet;
+            for (int x = bx; x < bx + NONET_SIZE; x++) {
+                for (int y = by; y < by + NONET_SIZE; y++) {
+                    Cell cell = grid[x][y];
+                    nonet.addCell(cell);
+                    if (cell.getValue() != -1)
+                        nonet.removeAvailable(cell.getValue());
+                }
+            }
+            cout << bx << "," << by << ": " << nonet.getAvailable().size() << endl;
+        }
+    }
+    cout << "Created nonets" << endl;
 
-                //Find the current box coordinates
-                int boxX = (int) ceil(x / 3.) * 3;
-                int boxY = (int) ceil(y / 3.) * 3;
+    for (int bx = 0; bx < NONET_SIZE; bx++) {
+        for (int by = 0; by < NONET_SIZE; by++) {
+            Nonet nonet = nonets[bx][by];
+            cout << nonet.getAvailable().size() << endl;
+            for (int x = 0; x < NONET_SIZE; x++) {
+                for (int y = 0; y < NONET_SIZE; y++) {
+                    int cx = nonet.getX() + x;
+                    int cy = nonet.getY() + y;
 
-                //Find the numbers that are already taken
-                list<int> box;
-                list<int> column;
-                list<int> row;
+                    Cell cell = grid[cx][cy];
+                    if (cell.getValue() == -1) {
+                        cell.addAvailable(nonet.getAvailable());
 
-                //Current box
-                for (int bx = 0; bx < 3; bx++) {
-                    for (int by = 0; by < 3; by++) {
-                        Cell next = grid[(boxX + bx) % COLUMNS][(boxY + by) % ROWS];
-                        if (next.getValue() != -1)
-                            box.push_front(next.getValue());
+                        for (int z = 0; z < GRID_SIZE; z++) {
+                            Cell nextColumn = grid[z][cy];
+                            Cell nextRow = grid[cx][z];
+                            //if (find(cell.getAvailable().begin(), cell.getAvailable().end(), nextColumn.getValue()) != cell.getAvailable().end())
+                            cell.removeAvailable(nextColumn.getValue());
+                            //if (find(cell.getAvailable().begin(), cell.getAvailable().end(), nextRow.getValue()) != cell.getAvailable().end())
+                            cell.removeAvailable(nextRow.getValue());
+                        }
+
+                        if (cell.getAvailable().size() == 1)
+                            cell.setValue(cell.getAvailable().back());
                     }
                 }
-
-                //Column
-                for (int c = 0; c < COLUMNS; c++) {
-                    Cell next = grid[c][y];
-                    if (next.getValue() != -1)
-                        column.push_front(next.getValue());
-                }
-
-                //Row
-                for (int r = 0; r < ROWS; r++) {
-                    Cell next = grid[x][r];
-                    if (next.getValue() != -1)
-                        row.push_front(next.getValue());
-                }
-
-                //box should have 6
-                //column should have 2,6,8
-                //row should have 4,5,6,7,8
-                //overall can have 1,3,9
-                //^^ that's all i have at this current point
-
-                //TODO: need to scan cells
             }
         }
-
-        //TODO: clear the console window and print out the percentage of sudoku completion
-        //TODO: remove the break, and implement a proper check whether the sudoku is solved
-        break;
     }
 
+    //TODO: solve the sudoku, and clear the console window and print out the percentage of sudoku completion
+
     //Clear the console window
-    system("cls");
+    //system("cls");
 
     //Print out the final sudoku solution
-    for (int x = 0; x < COLUMNS; x++) {
-        for (int y = 0; y < ROWS; y++) {
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
             Cell cell = grid[x][y];
             cout << (cell.getValue() == -1 ? "-" : to_string(cell.getValue()));
             if ((y + 1) % 3 == 0)
@@ -159,7 +163,7 @@ int main() {
  */
 bool isRowValid(string *row) {
     int len = row->length();
-    return len == COLUMNS && row->find_first_not_of("0123456789?-") == string::npos;
+    return len == GRID_SIZE && row->find_first_not_of("0123456789?-") == string::npos;
 }
 
 /**

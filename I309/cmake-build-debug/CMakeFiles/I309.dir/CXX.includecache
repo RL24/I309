@@ -16,15 +16,29 @@ iostream
 list
 -
 
-D:/Documents/Development/dotNET/C++/I309/I309/main.cpp
+D:/Documents/Development/dotNET/C++/I309/I309/Nonet.cpp
+Nonet.h
+D:/Documents/Development/dotNET/C++/I309/I309/Nonet.h
+
+D:/Documents/Development/dotNET/C++/I309/I309/Nonet.h
 iostream
--
-cmath
--
-vector
 -
 list
 -
 Cell.h
 D:/Documents/Development/dotNET/C++/I309/I309/Cell.h
+
+D:/Documents/Development/dotNET/C++/I309/I309/main.cpp
+iostream
+-
+vector
+-
+algorithm
+-
+list
+-
+Cell.h
+D:/Documents/Development/dotNET/C++/I309/I309/Cell.h
+Nonet.h
+D:/Documents/Development/dotNET/C++/I309/I309/Nonet.h
 

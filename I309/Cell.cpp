@@ -37,6 +37,14 @@ int Cell::getValue() {
 }
 
 /**
+ * Set the number in the current cell
+ * @param value The new value for the cell
+ */
+void Cell::setValue(int value) {
+    this->value = value;
+}
+
+/**
  * Get the list of available numbers
  * @return The list of available numbers
  */
@@ -53,9 +61,28 @@ void Cell::addAvailable(int value) {
 }
 
 /**
+ * Add a range of values to the available numbers selection
+ * @param values The values to add
+ */
+void Cell::addAvailable(list<int> values) {
+    for (int value: values) {
+        addAvailable(value);
+    }
+}
+
+/**
  * Remove a value from the available number selection
  * @param value The value to remove
  */
 void Cell::removeAvailable(int value) {
     available.remove(value);
+}
+
+/**
+ * Override the default == operator for use in lists
+ * @param cell
+ * @return Whether the two cells have the same value+
+ */
+bool Cell::operator==(Cell cell) {
+    return cell.getValue() == value;
 }

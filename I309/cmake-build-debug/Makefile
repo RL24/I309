@@ -149,6 +149,33 @@ Cell.cpp.s:
 	$(MAKE) -f CMakeFiles\I309.dir\build.make CMakeFiles/I309.dir/Cell.cpp.s
 .PHONY : Cell.cpp.s
 
+Nonet.obj: Nonet.cpp.obj
+
+.PHONY : Nonet.obj
+
+# target to build an object file
+Nonet.cpp.obj:
+	$(MAKE) -f CMakeFiles\I309.dir\build.make CMakeFiles/I309.dir/Nonet.cpp.obj
+.PHONY : Nonet.cpp.obj
+
+Nonet.i: Nonet.cpp.i
+
+.PHONY : Nonet.i
+
+# target to preprocess a source file
+Nonet.cpp.i:
+	$(MAKE) -f CMakeFiles\I309.dir\build.make CMakeFiles/I309.dir/Nonet.cpp.i
+.PHONY : Nonet.cpp.i
+
+Nonet.s: Nonet.cpp.s
+
+.PHONY : Nonet.s
+
+# target to generate assembly for a file
+Nonet.cpp.s:
+	$(MAKE) -f CMakeFiles\I309.dir\build.make CMakeFiles/I309.dir/Nonet.cpp.s
+.PHONY : Nonet.cpp.s
+
 main.obj: main.cpp.obj
 
 .PHONY : main.obj
@@ -188,6 +215,9 @@ help:
 	@echo ... Cell.obj
 	@echo ... Cell.i
 	@echo ... Cell.s
+	@echo ... Nonet.obj
+	@echo ... Nonet.i
+	@echo ... Nonet.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

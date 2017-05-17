@@ -4,6 +4,11 @@
 CMakeFiles/I309.dir/Cell.cpp.obj: ../Cell.cpp
 CMakeFiles/I309.dir/Cell.cpp.obj: ../Cell.h
 
+CMakeFiles/I309.dir/Nonet.cpp.obj: ../Cell.h
+CMakeFiles/I309.dir/Nonet.cpp.obj: ../Nonet.cpp
+CMakeFiles/I309.dir/Nonet.cpp.obj: ../Nonet.h
+
 CMakeFiles/I309.dir/main.cpp.obj: ../Cell.h
+CMakeFiles/I309.dir/main.cpp.obj: ../Nonet.h
 CMakeFiles/I309.dir/main.cpp.obj: ../main.cpp
 
