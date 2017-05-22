@@ -98,6 +98,7 @@ int main() {
             cout << bx << "," << by << ": " << nonet.getAvailable().size() << endl;
         }
     }
+
     cout << "Created nonets" << endl;
 
     for (int bx = 0; bx < NONET_SIZE; bx++) {
