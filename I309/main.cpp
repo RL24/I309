@@ -1,20 +1,33 @@
 //Include necessary libraries
 #include <iostream>
+#include <cmath>
 #include <vector>
-#include <algorithm>
 #include <list>
-#include "Cell.h"
-#include "Nonet.h"
+#include <sstream>
 
 //Disable the need to use "std::<method>"
 using namespace std;
 
-//Declare methods (must be done prior to method calls)
-bool isRowValid(string *row);
-void replaceString(string *str, string from, string to);
-
+//Create some constant non-changing values
 const int NONET_SIZE = 3;
 const int GRID_SIZE = NONET_SIZE * 3;
+
+//Declare methods (must be done prior to method calls)
+bool isRowValid(string *row);
+
+void replaceString(string *str, string from, string to);
+
+bool inRow(int grid[GRID_SIZE][GRID_SIZE], int row, int value);
+
+bool inCol(int grid[GRID_SIZE][GRID_SIZE], int col, int value);
+
+bool inBox(int grid[GRID_SIZE][GRID_SIZE], int row, int col, int value);
+
+bool solveSudoku(int grid[GRID_SIZE][GRID_SIZE], int row, int col);
+
+float floor(float value, float incremental);
+
+int floor(int value, int incremental);
 
 //Main function
 int main() {
@@ -56,8 +69,8 @@ int main() {
 
     cout << "Validated" << endl;
 
-    Nonet nonets[NONET_SIZE][NONET_SIZE];
-    Cell grid[GRID_SIZE][GRID_SIZE];
+    int grid[GRID_SIZE][GRID_SIZE];
+    int predefined[GRID_SIZE][GRID_SIZE];
 
     //Convert the user input to a more usable format
     for (int x = 0; x < GRID_SIZE; x++) {
@@ -69,67 +82,40 @@ int main() {
             if (value < 0 || value > 9)
                 value = -1;
 
-            grid[x][y] = Cell(x, y, value);
+            predefined[x][y] = value;
+            grid[x][y] = value;
         }
     }
     cout << "Created grid" << endl;
 
-    /**
-     * New solve method, iterate over each "nonet" (3x3 square), give each square all available numbers in
-     * the current nonet, iterate over each cell in the nonet, if each number available is already
-     * in the same row or column of the current cell, remove it from the available for that cell. If the
-     * cells available numbers only has one remaining, that is the number for that cell. Thinking of the
-     * algorithm I'll need to do this is yet for me to figure out, but I'm somewhat positive that it will
-     * require refactoring multiple times
-     */
+    bool solved = false;
+    int i = 0;
+    /*while (!solved) {
+        solved = true;
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                if (predefined[x][y] != -1)
+                    continue;
+                solved = false;
 
-    for (int bx = 0; bx < GRID_SIZE; bx+= NONET_SIZE) {
-        for (int by = 0; by < GRID_SIZE; by+= NONET_SIZE) {
-            Nonet nonet = Nonet(bx, by);
-            nonets[bx / NONET_SIZE][by / NONET_SIZE] = nonet;
-            for (int x = bx; x < bx + NONET_SIZE; x++) {
-                for (int y = by; y < by + NONET_SIZE; y++) {
-                    Cell cell = grid[x][y];
-                    nonet.addCell(cell);
-                    if (cell.getValue() != -1)
-                        nonet.removeAvailable(cell.getValue());
-                }
-            }
-            cout << bx << "," << by << ": " << nonet.getAvailable().size() << endl;
-        }
-    }
+                auto boxX = (int) (ceil(x / 3) * 3);
+                auto boxY = (int) (ceil(y / 3) * 3);
 
-    cout << "Created nonets" << endl;
+                cout << boxX << ", " << boxY << endl;
 
-    for (int bx = 0; bx < NONET_SIZE; bx++) {
-        for (int by = 0; by < NONET_SIZE; by++) {
-            Nonet nonet = nonets[bx][by];
-            cout << nonet.getAvailable().size() << endl;
-            for (int x = 0; x < NONET_SIZE; x++) {
-                for (int y = 0; y < NONET_SIZE; y++) {
-                    int cx = nonet.getX() + x;
-                    int cy = nonet.getY() + y;
-
-                    Cell cell = grid[cx][cy];
-                    if (cell.getValue() == -1) {
-                        cell.addAvailable(nonet.getAvailable());
-
-                        for (int z = 0; z < GRID_SIZE; z++) {
-                            Cell nextColumn = grid[z][cy];
-                            Cell nextRow = grid[cx][z];
-                            //if (find(cell.getAvailable().begin(), cell.getAvailable().end(), nextColumn.getValue()) != cell.getAvailable().end())
-                            cell.removeAvailable(nextColumn.getValue());
-                            //if (find(cell.getAvailable().begin(), cell.getAvailable().end(), nextRow.getValue()) != cell.getAvailable().end())
-                            cell.removeAvailable(nextRow.getValue());
-                        }
-
-                        if (cell.getAvailable().size() == 1)
-                            cell.setValue(cell.getAvailable().back());
+                for (int z = 1; z <= 9; z++) {
+                    if (!inRow(grid, x, z) && !inCol(grid, y, z) && !inBox(grid, boxX, boxY, z)) {
+                        grid[x][y] = z;
                     }
                 }
             }
         }
-    }
+        i++;
+        if (i > 100) {
+            break;
+        }
+    }*/
+    solveSudoku(grid, 0, 0);
 
     //TODO: solve the sudoku, and clear the console window and print out the percentage of sudoku completion
 
@@ -139,8 +125,8 @@ int main() {
     //Print out the final sudoku solution
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < GRID_SIZE; y++) {
-            Cell cell = grid[x][y];
-            cout << (cell.getValue() == -1 ? "-" : to_string(cell.getValue()));
+            int value = grid[x][y];
+            cout << (value == -1 ? "-" : to_string(value));
             if ((y + 1) % 3 == 0)
                 cout << " ";
         }
@@ -178,6 +164,99 @@ void replaceString(string *str, string from, string to) {
     //While the input string contains "from", replace text from "pos" to "pos + to.length" with "to"
     while ((pos = str->find(from, pos)) != string::npos) {
         str->replace(pos, from.length(), to);
-        pos+= to.length();
+        pos += to.length();
     }
+}
+
+/**
+ * Check if the given value is in the specified row in the sudoku
+ * @param grid The sudoku grid of known values
+ * @param row The row to check in
+ * @param value The value to check
+ * @return If the row contains the value
+ */
+bool inRow(int grid[GRID_SIZE][GRID_SIZE], int row, int value) {
+    for (int x = 0; x < GRID_SIZE; x++)
+        if (grid[row][x] == value)
+            return true;
+    return false;
+}
+
+/**
+ * Check if the given value is in the specified column in the sudoku
+ * @param grid The sudoku grid of known values
+ * @param col The column to check in
+ * @param value The value to check
+ * @return If the column contains the value
+ */
+bool inCol(int grid[GRID_SIZE][GRID_SIZE], int col, int value) {
+    for (int y = 0; y < GRID_SIZE; y++)
+        if (grid[y][col] == value)
+            return true;
+    return false;
+}
+
+/**
+ * Check if the given value is in the specified box in the sudoku
+ * @param grid The sudoku grid of known values
+ * @param row The base row of the box
+ * @param col The base column of the box
+ * @param value The value to check
+ * @return If the box contains the value
+ */
+bool inBox(int grid[GRID_SIZE][GRID_SIZE], int row, int col, int value) {
+    for (int y = row; y < row + NONET_SIZE; y++)
+        for (int x = col; x < col + NONET_SIZE; x++)
+            if (grid[y][x] == value)
+                return true;
+    return false;
+}
+
+/**
+ * Attempt to solve the sudoku (uses recursion)
+ * @param grid The sudoku grid of known values
+ * @param row The row of the current cell to check
+ * @param col The column of the current cell to check
+ * @return Whether or not there are any valid numbers for the current cell (essentially true if the sudoku is solved)
+ */
+bool solveSudoku(int grid[GRID_SIZE][GRID_SIZE], int row, int col) {
+    int _col = (col + 1) % GRID_SIZE;
+    int _row = _col == 0 ? row + 1 : row;
+    bool beyond = _col >= GRID_SIZE || _row >= GRID_SIZE;
+
+    if (beyond)
+        return false;
+
+    if (grid[row][col] != -1)
+        return solveSudoku(grid, _row, _col);
+
+    auto boxX = (int) (round(row / NONET_SIZE) * NONET_SIZE);
+    auto boxY = (int) (round(col / NONET_SIZE) * NONET_SIZE);
+
+    for (int i = 1; i <= GRID_SIZE; i++) {
+        if (!inCol(grid, col, i) && !inRow(grid, row, i) && !inBox(grid, boxX, boxY, i)) {
+            grid[row][col] = i;
+            if (solveSudoku(grid, _row, _col)) {
+                return true;
+            }
+        }
+    }
+    grid[row][col] = -1;
+    return false;
+}
+
+/**
+ * Floor a value to a given incremental multiplier (e.g. floor 75 to the nearest 20 mutliplier = 80 (20 * 4 = 80, 20 * 3 = 60, 75 is closer to 80))
+ * @param value The value to floor
+ * @param incremental The incremental value to floor to a multiplier of
+ * @return The floored value to the nearest incremental multiplier
+ */
+float floor(float value, float incremental) {
+    float one = 1 / incremental;
+    return floor(value * one) / one;
+}
+
+/**Integer overload for float floor()**/
+int floor(int value, int incremental) {
+    return (int) floor((float) value, (float) incremental);
 }
