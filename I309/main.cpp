@@ -19,11 +19,15 @@ void replaceString(string *str, string from, string to);
 
 bool inRow(int grid[GRID_SIZE][GRID_SIZE], int row, int value);
 
+bool inRowPos(int grid[GRID_SIZE][GRID_SIZE][9], int row, int value);
+
 bool inCol(int grid[GRID_SIZE][GRID_SIZE], int col, int value);
+
+bool inColPos(int grid[GRID_SIZE][GRID_SIZE][9], int col, int value);
 
 bool inBox(int grid[GRID_SIZE][GRID_SIZE], int row, int col, int value);
 
-bool solveSudoku(int grid[GRID_SIZE][GRID_SIZE], int row, int col);
+bool inBoxPos(int grid[GRID_SIZE][GRID_SIZE][9], int row, int col, int value);
 
 float floor(float value, float incremental);
 
@@ -88,34 +92,61 @@ int main() {
     }
     cout << "Created grid" << endl;
 
+    int possibilities[GRID_SIZE][GRID_SIZE][9];
+    for (int x = 0; x < GRID_SIZE; x++)
+        for (int y = 0; y < GRID_SIZE; y++)
+            for (int z = 0; z < 9; z++)
+                possibilities[x][y][z] = -1;
+
     bool solved = false;
-    int i = 0;
-    /*while (!solved) {
+    while (!solved) {
         solved = true;
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int y = 0; y < GRID_SIZE; y++) {
-                if (predefined[x][y] != -1)
+                if (grid[x][y] != -1)
                     continue;
+
+                auto boxX = (int) (ceil(x / 3) * 3);
+                auto boxY = (int) (ceil(y / 3) * 3);
+
+                for (int z = 1; z <= 9; z++) {
+                    if (!inRow(grid, x, z) && !inCol(grid, y, z)/* && !inBox(grid, boxX, boxY, z)*/) {
+                        bool set = false;
+                        for (int w = 0; w < 9; w++) {
+                            if (possibilities[x][y][w] == -1) {
+                                possibilities[x][y][w] = z;
+                                set = true;
+                                break;
+                            }
+                        }
+                        if (set)
+                            break;
+                    }
+                }
+            }
+        }
+
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                if (grid[x][y] != -1)
+                    continue;
+
                 solved = false;
 
                 auto boxX = (int) (ceil(x / 3) * 3);
                 auto boxY = (int) (ceil(y / 3) * 3);
 
-                cout << boxX << ", " << boxY << endl;
-
+                //Iterate over the possibles and set them to -1 if its in another cell in the row col or boxes possibilities
                 for (int z = 1; z <= 9; z++) {
-                    if (!inRow(grid, x, z) && !inCol(grid, y, z) && !inBox(grid, boxX, boxY, z)) {
+                    if (!inRowPos(possibilities, x, z) && !inColPos(possibilities, y, z)/* && !inBoxPos(possibilities, boxX, boxY, z)*/) {
                         grid[x][y] = z;
+                        break;
                     }
                 }
             }
         }
-        i++;
-        if (i > 100) {
-            break;
-        }
-    }*/
-    solveSudoku(grid, 0, 0);
+    }
+    //solveSudoku(grid, 0, 0);
 
     //TODO: solve the sudoku, and clear the console window and print out the percentage of sudoku completion
 
@@ -141,7 +172,7 @@ int main() {
     return 0;
 }
 
-//Define a body for the declared methods above
+//Define bodies for the declared methods above
 
 /**
  * Check that the row length matches the required, and the input only contains valid characters "0-9, ?, -"
@@ -183,6 +214,21 @@ bool inRow(int grid[GRID_SIZE][GRID_SIZE], int row, int value) {
 }
 
 /**
+ * Check if the given value is in the specified rows possibilities in the sudoku
+ * @param grid The sudoku grid of known values
+ * @param row The row to check in
+ * @param value The value to check
+ * @return If the rows possibilities contains the value
+ */
+bool inRowPos(int grid[GRID_SIZE][GRID_SIZE][9], int row, int value) {
+    for (int x = 0; x < GRID_SIZE; x++)
+        for (int z = 0; z < 9; z++)
+            if (value != -1 && grid[row][x][z] == value)
+                return true;
+    return false;
+}
+
+/**
  * Check if the given value is in the specified column in the sudoku
  * @param grid The sudoku grid of known values
  * @param col The column to check in
@@ -197,6 +243,21 @@ bool inCol(int grid[GRID_SIZE][GRID_SIZE], int col, int value) {
 }
 
 /**
+ * Check if the given value is in the specified columns possibilities in the sudoku
+ * @param grid The sudoku grid of known values
+ * @param col The column to check in
+ * @param value The value to check
+ * @return If the columns possibilities contains the value
+ */
+bool inColPos(int grid[GRID_SIZE][GRID_SIZE][9], int col, int value) {
+    for (int y = 0; y < GRID_SIZE; y++)
+        for (int z = 0; z < 9; z++)
+            if (value != -1 && grid[y][col][z] == value)
+                return true;
+    return false;
+}
+
+/**
  * Check if the given value is in the specified box in the sudoku
  * @param grid The sudoku grid of known values
  * @param row The base row of the box
@@ -205,43 +266,27 @@ bool inCol(int grid[GRID_SIZE][GRID_SIZE], int col, int value) {
  * @return If the box contains the value
  */
 bool inBox(int grid[GRID_SIZE][GRID_SIZE], int row, int col, int value) {
-    for (int y = row; y < row + NONET_SIZE; y++)
-        for (int x = col; x < col + NONET_SIZE; x++)
-            if (grid[y][x] == value)
+    for (int x = row; x < row + NONET_SIZE; x++)
+        for (int y = col; y < col + NONET_SIZE; y++)
+            if (grid[x][y] == value)
                 return true;
     return false;
 }
 
 /**
- * Attempt to solve the sudoku (uses recursion)
- * @param grid The sudoku grid of known values
- * @param row The row of the current cell to check
- * @param col The column of the current cell to check
- * @return Whether or not there are any valid numbers for the current cell (essentially true if the sudoku is solved)
+ * Check if the given value is in the specified boxes possibilities in the sudoku
+ * @param grid The sudoku grid possibilities of known values
+ * @param row The base row of the box
+ * @param col The base column of the box
+ * @param value The value to check
+ * @return If the boxes possibilities contains the value
  */
-bool solveSudoku(int grid[GRID_SIZE][GRID_SIZE], int row, int col) {
-    int _col = (col + 1) % GRID_SIZE;
-    int _row = _col == 0 ? row + 1 : row;
-    bool beyond = _col >= GRID_SIZE || _row >= GRID_SIZE;
-
-    if (beyond)
-        return false;
-
-    if (grid[row][col] != -1)
-        return solveSudoku(grid, _row, _col);
-
-    auto boxX = (int) (round(row / NONET_SIZE) * NONET_SIZE);
-    auto boxY = (int) (round(col / NONET_SIZE) * NONET_SIZE);
-
-    for (int i = 1; i <= GRID_SIZE; i++) {
-        if (!inCol(grid, col, i) && !inRow(grid, row, i) && !inBox(grid, boxX, boxY, i)) {
-            grid[row][col] = i;
-            if (solveSudoku(grid, _row, _col)) {
-                return true;
-            }
-        }
-    }
-    grid[row][col] = -1;
+bool inBoxPos(int grid[GRID_SIZE][GRID_SIZE][9], int row, int col, int value) {
+    for (int x = row; x < row + NONET_SIZE; x++)
+        for (int y = col; y < col + NONET_SIZE; y++)
+            for (int z = 0; z < 9; z++)
+                if (value != -1 && grid[x][y][z] == value)
+                    return true;
     return false;
 }
 
