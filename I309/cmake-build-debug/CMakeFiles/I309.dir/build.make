@@ -33,10 +33,10 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\Feignex\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\172.2273.4\bin\cmake\bin\cmake.exe
+CMAKE_COMMAND = C:\Users\Feignex\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\172.2827.9\bin\cmake\bin\cmake.exe
 
 # The command to remove a file.
-RM = C:\Users\Feignex\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\172.2273.4\bin\cmake\bin\cmake.exe -E remove -f
+RM = C:\Users\Feignex\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\172.2827.9\bin\cmake\bin\cmake.exe -E remove -f
 
 # Escaping for special characters.
 EQUALS = =

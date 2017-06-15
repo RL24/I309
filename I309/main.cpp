@@ -1,5 +1,7 @@
 //Include necessary libraries
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 //Disable the need to use "std::<method>"
 using namespace std;
@@ -12,6 +14,12 @@ const int UV = -1;
 bool isRowValid(string *row);
 
 void replaceString(string *str, string from, string to);
+
+void parseValueToGrid(int grid[GS][GS], char _char, int row, int col);
+
+void printRow(int grid[GS][GS], int row);
+
+void printRow(string row);
 
 bool isEmpty(int grid[GS][GS], int &row, int &col);
 
@@ -52,8 +60,8 @@ int main() {
         while (!isRowValid(&rows[i])) {
             system("cls");
             cout << "Row " << i + 1 << " is invalid:" << endl;
-            cout << rows[i] << endl << endl;
-            cout << "Please re-enter row " << i + 1 << ":" << endl;
+            printRow(rows[i]);
+            cout << endl << endl << "Please re-enter row " << i + 1 << ":" << endl;
 
             //Get the new formatted row input
             getline(cin, rows[i]);
@@ -61,48 +69,82 @@ int main() {
         }
     }
 
-    cout << "Validated" << endl;
-
     int grid[GS][GS];
 
     //Convert the user input to a more usable format
-    for (int x = 0; x < GS; x++) {
-        for (int y = 0; y < GS; y++) {
-            //Negate by the int value of '0' to ensure the content of value is 0-9
-            int value = rows[x][y] - '0';
+    for (int x = 0; x < GS; x++)
+        for (int y = 0; y < GS; y++)
+            parseValueToGrid(grid, rows[x][y], x, y);
 
-            //If the value is not 0-9, set to "UV" to represent an unknown grid cell
-            if (value < 0 || value > 9)
-                value = UV;
+    //Solve the sudoku
+    while (!solve(grid)) {
+        system("cls");
+        cout << "There is not sufficient input to solve the sudoku. Please enter a row you would like to update:" << endl << endl;
 
-            grid[x][y] = value;
+        //Print out the current sudoku grid values in a viewable format
+        for (int x = 0; x < GS; x++) {
+            cout << x + 1 << ") ";
+            printRow(grid, x);
+            cout << endl;
+            if ((x + 1) % 3 == 0)
+                cout << endl;
         }
+
+        //Get a new row index to update/change
+        cout << "Row to update:" << endl;
+
+        string rowString;
+        getline(cin, rowString);
+
+        if (rowString.empty() || (isdigit(rowString[0]) == 0))
+            continue;
+
+        int row = rowString[0] - '1';
+
+        if (row < 0 || row > 8)
+            continue;
+
+        //Continuously ask for the new row values until the new row is a valid input
+        string newRow;
+        system("cls");
+        while (newRow.length() == 0 || !isRowValid(&newRow)) {
+            //Print the original row
+            cout << "Original row " << row + 1 << " values:" << endl;
+            printRow(grid, row);
+            cout << endl << endl << "New row " << row + 1 << ":" << endl;
+
+            //Get a new row input
+            getline(cin, newRow);
+
+            //Format and validate the new row
+            replaceString(&newRow, " ", "");
+
+            if (newRow.length() == 0 || !isRowValid(&newRow)) {
+                //Clear the console window, and ask the user to try again
+                system("cls");
+                cout << "Invalid row input (" << newRow << "). Please try again: " << endl << endl;
+            }
+        }
+
+        //Parse the updated row values to the grid
+        for (int i = 0; i < GS; i++)
+            parseValueToGrid(grid, newRow[i], row, i);
     }
 
-    cout << "Created grid" << endl;
-
-    solve(grid);
-
-    //TODO: solve the sudoku, and clear the console window and print out the percentage of sudoku completion
-
     //Clear the console window
-    //system("cls");
+    system("cls");
+    cout << "Successfully solved the sudoku:" << endl << endl;
 
     //Print out the final sudoku solution
     for (int x = 0; x < GS; x++) {
-        for (int y = 0; y < GS; y++) {
-            int value = grid[x][y];
-            cout << (value == UV ? "-" : to_string(value));
-            if ((y + 1) % 3 == 0)
-                cout << " ";
-        }
+        printRow(grid, x);
         cout << endl;
         if ((x + 1) % 3 == 0)
             cout << endl;
     }
 
-    int a;
-    cin >> a;
+    //Pause the console so the user can copy the sudoku solution before it closes
+    system("pause");
 
     return 0;
 }
@@ -134,6 +176,58 @@ void replaceString(string *str, string from, string to) {
     }
 }
 
+/**
+ * Parse a given value to the int grid
+ * @param grid The sudoku grid to populate
+ * @param _char The character to parse
+ * @param row The row to assign the parsed value to
+ * @param col The column to assign the parsed value to
+ */
+void parseValueToGrid(int grid[GS][GS], char _char, int row, int col) {
+    //Negate by the int value of '0' to ensure the content of value is 0-9
+    int value = _char - '0';
+
+    //If the value is not 0-9, set to "UV" to represent an unknown grid cell
+    if (value < 0 || value > GS)
+        value = UV;
+
+    //Set the grid cell value
+    grid[row][col] = value;
+}
+
+/**
+ * Print out a selected row to the console window
+ * @param grid The sudoku grid of known values
+ * @param row The row to print out
+ */
+void printRow(int grid[GS][GS], int row) {
+    for (int y = 0; y < GS; y++) {
+        int value = grid[row][y];
+        cout << (value == UV ? "-" : to_string(value));
+        if ((y + 1) % 3 == 0)
+            cout << " ";
+    }
+}
+
+/**
+ * Print out a formatted row to the console window
+ * @param row The row to format and print out
+ */
+void printRow(string row) {
+    for (int i = 0; i < GS; i++) {
+        cout << row[i];
+        if ((i + 1) % 3 == 0)
+            cout << " ";
+    }
+}
+
+/**
+ * Check if the selected cell is empty
+ * @param grid The sudoku grid of known values
+ * @param row The row to check
+ * @param col The column to check
+ * @return Whether the selected cell is empty or not
+ */
 bool isEmpty(int grid[GS][GS], int &row, int &col) {
     for (row = 0; row < GS; row++)
         for (col = 0; col < GS; col++)
@@ -179,8 +273,8 @@ bool inCol(int grid[GS][GS], int col, int value) {
  * @return If the box contains the value
  */
 bool inBox(int grid[GS][GS], int row, int col, int value) {
-    for (int x = row; x < row + NONET_SIZE; x++)
-        for (int y = col; y < col + NONET_SIZE; y++)
+    for (int x = row; x < row + 3; x++)
+        for (int y = col; y < col + 3; y++)
             if (grid[x][y] == value)
                 return true;
     return false;
